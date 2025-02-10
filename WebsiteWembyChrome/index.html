@@ -8,15 +8,17 @@
       padding: 15px;
       font-family: Arial, sans-serif;
     }
+    .input-container {
+      display: flex;
+      gap: 5px;
+    }
     input {
-      width: 100%;
-      margin-bottom: 10px;
+      flex: 1;
       padding: 8px;
       border: 1px solid #ddd;
       border-radius: 4px;
     }
     button {
-      width: 100%;
       padding: 8px;
       background-color: #4CAF50;
       color: white;
@@ -41,23 +43,32 @@
     }
     .remove-btn {
       background: none;
-      border: none;
+      border: 1px solid #ddd;
       color: #999;
-      font-size: 16px;
+      font-size: 14px;
       cursor: pointer;
-      padding: 0 8px;
-      width: auto;
+      padding: 4px 6px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: color 0.2s, background 0.2s, border-color 0.2s;
     }
     .remove-btn:hover {
-      color: #666;
-      background: none;
+      color: #e74c3c;
+      background: rgba(231, 76, 60, 0.1);
+      border-color: #e74c3c;
     }
   </style>
 </head>
 <body>
   <h2>URL Blocker</h2>
-  <input type="text" id="url-input" placeholder="youtube.com">
-  <button id="add-url">Add</button>
+  <div class="input-container">
+    <input type="text" id="url-input" placeholder="youtube.com">
+    <button id="add-url">Add</button>
+  </div>
   <div id="blocked-urls">
     <h3>Blocked URLs:</h3>
   </div>
