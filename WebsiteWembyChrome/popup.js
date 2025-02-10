@@ -3,6 +3,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlInput = document.getElementById('url-input');
     const addButton = document.getElementById('add-url');
     const blockedUrlsDiv = document.getElementById('blocked-urls');
+    const toggleAdvanced = document.getElementById('toggle-advanced');
+    const advancedSettings = document.getElementById('advanced-settings');
+    
+    // Advanced settings inputs
+    const startTime = document.getElementById('start-time');
+    const endTime = document.getElementById('end-time');
+    const timeLimit = document.getElementById('time-limit');
+    const timeUnit = document.getElementById('time-unit');
+  
+    toggleAdvanced.addEventListener('click', () => {
+      advancedSettings.classList.toggle('show');
+    });
   
     function loadBlockedUrls() {
       chrome.storage.sync.get(['blockedUrls'], (result) => {
@@ -16,9 +28,21 @@ document.addEventListener('DOMContentLoaded', () => {
       urls.forEach(url => {
         const div = document.createElement('div');
         div.className = 'url-item';
+        
+        let timeInfo = '';
+        if (url.startTime && url.endTime) {
+          timeInfo += `<div class="time-info">${url.startTime} - ${url.endTime}</div>`;
+        }
+        if (url.timeLimit) {
+          timeInfo += `<div class="time-info">${url.timeLimit} ${url.timeUnit}</div>`;
+        }
+  
         div.innerHTML = `
-          <span>${url}</span>
-          <button class="remove-btn" data-url="${url}" title="Unblock">&times;</button>
+          <div class="url-info">
+            <span>${url.url || url}</span>
+            ${timeInfo}
+          </div>
+          <button class="remove-btn" data-url="${url.url || url}">&times;</button>
         `;
         blockedUrlsDiv.appendChild(div);
       });
@@ -29,26 +53,42 @@ document.addEventListener('DOMContentLoaded', () => {
       if (url) {
         chrome.storage.sync.get(['blockedUrls'], (result) => {
           const blockedUrls = result.blockedUrls || [];
-          if (!blockedUrls.includes(url)) {
-            blockedUrls.push(url);
+          
+          // Create URL object with time settings if provided
+          const urlObject = {
+            url: url,
+            startTime: startTime.value || null,
+            endTime: endTime.value || null,
+            timeLimit: timeLimit.value || null,
+            timeUnit: timeLimit.value ? timeUnit.value : null
+          };
+  
+          // Check if URL already exists
+          const exists = blockedUrls.some(blocked => 
+            (blocked.url === url) || (typeof blocked === 'string' && blocked === url)
+          );
+  
+          if (!exists) {
+            blockedUrls.push(urlObject);
             chrome.storage.sync.set({ blockedUrls }, () => {
               loadBlockedUrls();
               urlInput.value = '';
+              startTime.value = '';
+              endTime.value = '';
+              timeLimit.value = '';
             });
           }
         });
       }
     }
   
-    // Handle Enter key press
     urlInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
-        e.preventDefault(); // Prevent form submission if within a form
+        e.preventDefault();
         addUrl();
       }
     });
   
-    // Handle Add button click
     addButton.addEventListener('click', addUrl);
   
     blockedUrlsDiv.addEventListener('click', (e) => {
@@ -56,7 +96,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const urlToRemove = e.target.dataset.url;
         chrome.storage.sync.get(['blockedUrls'], (result) => {
           const blockedUrls = result.blockedUrls || [];
-          const updatedUrls = blockedUrls.filter(url => url !== urlToRemove);
+          const updatedUrls = blockedUrls.filter(blocked => 
+            (blocked.url !== urlToRemove) && (blocked !== urlToRemove)
+          );
           chrome.storage.sync.set({ blockedUrls: updatedUrls }, loadBlockedUrls);
         });
       }
