@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Website Wemby</title>
+  <style>
+    body {
+      width: 300px;
+      padding: 15px;
+      font-family: Arial, sans-serif;
+    }
+    input {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      width: 100%;
+      padding: 8px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #blocked-urls {
+      margin-top: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .url-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+    }
+    .remove-btn {
+      background: none;
+      border: none;
+      color: #999;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 0 8px;
+      width: auto;
+    }
+    .remove-btn:hover {
+      color: #666;
+      background: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>URL Blocker</h2>
+  <input type="text" id="url-input" placeholder="youtube.com">
+  <button id="add-url">Add</button>
+  <div id="blocked-urls">
+    <h3>Blocked URLs:</h3>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
