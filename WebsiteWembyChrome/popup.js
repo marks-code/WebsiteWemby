@@ -28,17 +28,30 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 
+  function normalizeUrl(inputUrl) {
+      // Remove common prefixes and www
+      let cleanUrl = inputUrl.toLowerCase()
+          .replace(/^(https?:\/\/)?(www\.)?/i, '')
+          .replace(/\/+$/, ''); // Remove trailing slashes
+      
+      // Remove everything after the first slash if present
+      cleanUrl = cleanUrl.split('/')[0];
+      
+      return cleanUrl;
+  }
+
   async function addUrl() {
-      const url = urlInput.value.trim().toLowerCase();
-      if (url) {
+      const inputUrl = urlInput.value.trim();
+      if (inputUrl) {
           try {
+              const normalizedUrl = normalizeUrl(inputUrl);
               const { blockedUrls = [] } = await chrome.storage.sync.get(['blockedUrls']);
               const exists = blockedUrls.some(blocked => 
-                  (blocked.url || blocked) === url
+                  normalizeUrl(blocked.url || blocked) === normalizedUrl
               );
 
               if (!exists) {
-                  blockedUrls.push({ url });
+                  blockedUrls.push({ url: normalizedUrl });
                   await chrome.storage.sync.set({ blockedUrls });
                   await loadBlockedUrls();
                   urlInput.value = '';
