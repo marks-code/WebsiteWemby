@@ -1,100 +1,78 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const urlInput = document.getElementById('url-input');
-    const addButton = document.getElementById('add-url');
-    const blockedUrlsDiv = document.getElementById('blocked-urls');
-    const toggleAdvanced = document.getElementById('toggle-advanced');
-    const advancedSettings = document.getElementById('advanced-settings');
+  const urlInput = document.getElementById('url-input');
+  const addButton = document.getElementById('add-url');
+  const blockedUrlsDiv = document.getElementById('blocked-urls');
 
-    const startTime = document.getElementById('start-time');
-    const endTime = document.getElementById('end-time');
-    const timeLimit = document.getElementById('time-limit');
-    const timeUnit = document.getElementById('time-unit');
+  async function loadBlockedUrls() {
+      try {
+          const { blockedUrls = [] } = await chrome.storage.sync.get(['blockedUrls']);
+          displayBlockedUrls(blockedUrls);
+      } catch (error) {
+      }
+  }
 
-    toggleAdvanced.addEventListener('click', () => {
-        advancedSettings.classList.toggle('show');
-    });
+  function displayBlockedUrls(urls) {
+      blockedUrlsDiv.innerHTML = '<h3>Blocked URLs:</h3>';
+      urls.forEach(url => {
+          const div = document.createElement('div');
+          div.className = 'url-item';
+          
+          const urlValue = typeof url === 'string' ? url : url.url;
+          div.innerHTML = `
+              <div class="url-info">
+                  <span>${urlValue}</span>
+              </div>
+              <button class="remove-btn" data-url="${urlValue}">×</button>
+          `;
+          blockedUrlsDiv.appendChild(div);
+      });
+  }
 
-    function loadBlockedUrls() {
-        chrome.storage.sync.get(['blockedUrls'], (result) => {
-            const blockedUrls = result.blockedUrls || [];
-            displayBlockedUrls(blockedUrls);
-        });
-    }
+  async function addUrl() {
+      const url = urlInput.value.trim().toLowerCase();
+      if (url) {
+          try {
+              const { blockedUrls = [] } = await chrome.storage.sync.get(['blockedUrls']);
+              const exists = blockedUrls.some(blocked => 
+                  (blocked.url || blocked) === url
+              );
 
-    function displayBlockedUrls(urls) {
-        blockedUrlsDiv.innerHTML = '<h3>Blocked URLs:</h3>';
-        urls.forEach(url => {
-            const div = document.createElement('div');
-            div.className = 'url-item';
+              if (!exists) {
+                  blockedUrls.push({ url });
+                  await chrome.storage.sync.set({ blockedUrls });
+                  await loadBlockedUrls();
+                  urlInput.value = '';
+              }
+          } catch (error) {
+              console.error('Error adding URL:', error);
+          }
+      }
+  }
 
-            let timeInfo = '';
-            if (url.startTime && url.endTime) {
-                timeInfo += `<div class="time-info">${url.startTime} - ${url.endTime}</div>`;
-            }
-            if (url.timeLimit) {
-                timeInfo += `<div class="time-info">${url.timeLimit} ${url.timeUnit}</div>`;
-            }
+  urlInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+          e.preventDefault();
+          addUrl();
+      }
+  });
 
-            div.innerHTML = `
-                <div class="url-info">
-                    <span>${url.url}</span>
-                    ${timeInfo}
-                </div>
-                <button class="remove-btn" data-url="${url.url}">×</button>
-            `;
-            blockedUrlsDiv.appendChild(div);
-        });
-    }
+  addButton.addEventListener('click', addUrl);
 
-    function addUrl() {
-        const url = urlInput.value.trim().toLowerCase();
-        if (url) {
-            chrome.storage.sync.get(['blockedUrls'], (result) => {
-                const blockedUrls = result.blockedUrls || [];
+  blockedUrlsDiv.addEventListener('click', async (e) => {
+      if (e.target.classList.contains('remove-btn')) {
+          try {
+              const urlToRemove = e.target.dataset.url;
+              const { blockedUrls = [] } = await chrome.storage.sync.get(['blockedUrls']);
+              const updatedUrls = blockedUrls.filter(blocked => 
+                  (blocked.url || blocked) !== urlToRemove
+              );
+              await chrome.storage.sync.set({ blockedUrls: updatedUrls });
+              await loadBlockedUrls();
+          } catch (error) {
+              console.error('Error removing URL:', error);
+          }
+      }
+  });
 
-                const urlObject = {
-                    url: url,
-                    startTime: startTime.value || null,
-                    endTime: endTime.value || null,
-                    timeLimit: timeLimit.value || null,
-                    timeUnit: timeLimit.value ? timeUnit.value : null
-                };
-
-                const exists = blockedUrls.some(blocked => blocked.url === urlObject.url);
-
-                if (!exists) {
-                    blockedUrls.push(urlObject);
-                    chrome.storage.sync.set({ blockedUrls }, () => {
-                        loadBlockedUrls();
-                        urlInput.value = '';
-                        startTime.value = '';
-                        endTime.value = '';
-                        timeLimit.value = '';
-                    });
-                }
-            });
-        }
-    }
-
-    urlInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            addUrl();
-        }
-    });
-
-    addButton.addEventListener('click', addUrl);
-
-    blockedUrlsDiv.addEventListener('click', (e) => {
-        if (e.target.classList.contains('remove-btn')) {
-            const urlToRemove = e.target.dataset.url;
-            chrome.storage.sync.get(['blockedUrls'], (result) => {
-                const blockedUrls = result.blockedUrls || [];
-                const updatedUrls = blockedUrls.filter(blocked => blocked.url !== urlToRemove);
-                chrome.storage.sync.set({ blockedUrls: updatedUrls }, loadBlockedUrls);
-            });
-        }
-    });
-
-    loadBlockedUrls();
+  loadBlockedUrls();
 });
