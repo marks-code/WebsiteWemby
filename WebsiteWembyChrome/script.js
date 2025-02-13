@@ -14,33 +14,9 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
             return hostname === blockedUrl || hostname.endsWith('.' + blockedUrl);
           });
   
-          if (blockedSite) {
-            // Check time settings if they exist
-            const withinTime = isWithinTimeRange(blockedSite.startTime, blockedSite.endTime);
-            if (withinTime) {
-              chrome.tabs.update(details.tabId, {
-                url: chrome.runtime.getURL('blocked.html')
-              });
-            }
-          }
         } catch (error) {
           console.log('Invalid URL', error);
         }
       });
     }
   });
-  
-  function isWithinTimeRange(startTime, endTime) {
-    if (!startTime || !endTime) return true;
-    
-    const now = new Date();
-    const current = now.getHours() * 60 + now.getMinutes();
-    
-    const [startHour, startMinute] = startTime.split(':').map(Number);
-    const [endHour, endMinute] = endTime.split(':').map(Number);
-    
-    const start = startHour * 60 + startMinute;
-    const end = endHour * 60 + endMinute;
-    
-    return current >= start && current <= end;
-  }

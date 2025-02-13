@@ -84,54 +84,6 @@
       background-color: #2fc677;
     }
 
-    .timer-toggle {
-      background: none;
-      border: none;
-      color: #734141;
-      font-size: 14px;
-      font-family: Outfit;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-      padding: 0.5px;
-      padding-top: 3px;
-      padding-bottom: 3px;
-      margin-bottom: 0px;
-      transition: background-color 0.2s ease;
-    }
-
-    .timer-toggle:hover {
-      background-color: aliceblue;
-    }
-
-    .advanced-settings {
-      display: none;
-      padding: 10px;
-      background: #f1f1f1;
-      border-radius: 6px;
-    }
-
-    .advanced-settings.show {
-      display: block;
-    }
-
-    .time-inputs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .time-limit {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .time-limit input {
-      width: 70px;
-    }
 
     #blocked-urls {
       margin-top: 0px;
@@ -195,24 +147,6 @@
     <div class="input-container">
       <input type="text" id="url-input" placeholder="youtube.com">
       <button id="add-url">+</button>
-    </div>
-
-    <button class="timer-toggle" id="toggle-advanced">
-      ⏰&nbsp;Set Timer
-    </button>
-
-    <div class="advanced-settings" id="advanced-settings">
-      <div class="time-inputs">
-        <input type="time" id="start-time">
-        <input type="time" id="end-time">
-      </div>
-      <div class="time-limit">
-        <input type="number" id="time-limit" min="1" placeholder="Limit">
-        <select id="time-unit">
-          <option value="minutes">Minutes</option>
-          <option value="hours">Hours</option>
-        </select>
-      </div>
     </div>
 
     <div id="blocked-urls">
